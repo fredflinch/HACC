@@ -1,2 +1,4 @@
 CREATE TABLE login(uname VARCHAR(255), pass_hash VARCHAR(255));
-CREATE TABLE sessions(id VARCHAR(10), command VARCHAR(65535), active BOOLEAN, last_checkin VARCHAR(17));
+CREATE TABLE sessions(id VARCHAR(10), command VARCHAR(65535), active BOOLEAN, last_checkin VARCHAR(17), pwd VARCHAR(16));
+
+

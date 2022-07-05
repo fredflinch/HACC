@@ -8,7 +8,6 @@ var crypto = require('crypto');
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
-const { resolve } = require("path");
 const http_c2 = require('./src/http_c2.js')
 const auth = require('./src/auth.js')
 
@@ -16,7 +15,7 @@ const auth = require('./src/auth.js')
 /**
  * App Variables
  */
-const app = express();
+var app = express();
 const port = process.env.PORT || 8000;
 
 /**
@@ -43,41 +42,81 @@ app.use(sessions({
 /**
  * Routes Definitions
  */
+// page defs 
+let main_page = '/list'
+
 var session;
 var ids = [];
+ids = http_c2.get_list(ids)
+http_c2.init_session(app)
 
 app.get("/", (req, res) => {
   if (req.session.userid){
-    res.send("<p>Options: <a href=\"/api/create\">CREATE</a></p>")
+    res.redirect(main_page)
   } else {
     res.render("login", { title: "login" });
   }
 });
-app.get("/login", (req, res) => {res.render("login", { title: "login" });});
+
+app.get('/login', (req, res) => {res.render("login", { title: "login" });});
 app.post('/auth',(req,res) => {
   auth.do_auth(req.body['username'], req.body['password'], res, req);
 });
 
-app.get('/api/create', (req, res) => {
+app.get('/manage/create', (req, res) => {
   if (req.session.userid){
-    var idValues = http_c2.create_agentid(ids);
-    ids = idValues.ids;
-    res.send("<h1><a href=/id/"+idValues.id+">"+idValues.id+"</a></h1><a href=\"/\">[GO BACK]</a>");
+    var idValues = http_c2.create_agentid(ids, app);
+    app = idValues.app
+    ids = http_c2.get_list(ids);
+    res.redirect(main_page)
   } else {
     res.redirect("/login")
   }
 });
+
+//TODO: Create management environment
+app.get('/manage/id', (req, res) => {
+  let id = req.query.id;
+  res.render('manage', { title: "manage", id: id})
+})
+
+// delete doesnt work
+app.post('/manage/delete', (req, res) => {
+  let id = req.query.id;
+  http_c2.del_session(id);
+  res.redirect(main_page);
+})
+
+
+app.get(main_page, (req, res) => {
+  if (req.session.userid){
+    ids = http_c2.get_list(ids);
+    let remove = -1
+    for (let i = 0; i < ids.length; i++){
+      if (ids[i].id == undefined){
+        remove = i;
+      }
+      if (ids[i].active == 1){
+        ids[i].active = "TRUE";
+      } else {
+        ids[i].active = "FALSE"
+      }
+    }
+    if (remove >= 0){ids.splice(remove, 1)}
+
+    res.render('home', {title:'home', items: ids})
+  } else {
+    res.redirect('/login');
+  }
+})
+
 
 app.get('/logout',(req,res) => {
   req.session.destroy();
   res.redirect('/');
 });
 
-http_c2.add_route(app, "123")
-
 /**
  * Server Activation -- run with 'npm run dev'
  */
 app.listen(port, () => { console.log(`Listening to requests on http://localhost:${port}`); });
-
-

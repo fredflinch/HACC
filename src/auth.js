@@ -27,7 +27,7 @@ function collect_pass (u, p){
     shasum.update(p)
     let phash = shasum.digest('hex')
     let auth = []
-    let db = new sqlite3.Database(path.join(__dirname, '../main.db'), sqlite3.OPEN_READONLY);
+    let db = new sqlite3.Database(path.join(__dirname, '../db/auth.db'), sqlite3.OPEN_READONLY);
     return new Promise((resolve, reject) =>
       db.each("SELECT uname, pass_hash FROM login", [], (err, row) => {
         if(row.uname === u && phash == row.pass_hash){
