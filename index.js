@@ -74,16 +74,33 @@ app.get('/manage/create', (req, res) => {
   }
 });
 
-//TODO: Create management environment
+//TODO: Create management page
 app.get('/manage/id', (req, res) => {
   let id = req.query.id;
-  res.render('manage', { title: "manage", id: id})
+  http_c2.server_get_cmd(id).then(cmd => {
+      res.render('manage', { title: "manage", id: id, cur_cmd: cmd})
+    });
 })
 
-// delete doesnt work
+// TODO: function driver needs to be created
+app.post('/manage/id/update_cmd', (req, res) => {
+  let id = req.body.id;
+  let ncmd = req.body.new_cmd
+  http_c2.update_cmd(id,ncmd)
+  res.redirect('/manage/id?id='+id)
+})
+
 app.post('/manage/delete', (req, res) => {
-  let id = req.query.id;
+  let id = req.body.id;
   http_c2.del_session(id);
+  for (i=0; i < ids.length; i++){
+    if (ids[i].id == id){
+      ids.splice(i, 1);
+      break
+    }
+  }
+
+
   res.redirect(main_page);
 })
 
@@ -97,14 +114,14 @@ app.get(main_page, (req, res) => {
         remove = i;
       }
       if (ids[i].active == 1){
-        ids[i].active = "TRUE";
+        ids[i].active = true;
       } else {
-        ids[i].active = "FALSE"
+        ids[i].active = false;
       }
     }
     if (remove >= 0){ids.splice(remove, 1)}
 
-    res.render('home', {title:'home', items: ids})
+    res.render('home', {title:'home', page_title:'List', items: ids})
   } else {
     res.redirect('/login');
   }

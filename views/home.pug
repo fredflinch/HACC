@@ -1,27 +1,21 @@
 extends layout
 block layout-content
-    h1 LIST
     div.sessions
-        table.table.table-striped
-            thead
+        table.status_table.table
+            thead.thead-dark
                 tr
-                    th Session 
-                    th Active 
-                    th Last Checkin
+                    th(style="text-align:center") Session 
+                    th(style="text-align:center") Active 
+                    th(style="text-align:center") Last Checkin
                     th 
             each i in items
                 tr
-                    th=i.id 
-                    th=i.active 
-                    th=i.last_checkin 
-                    th 
+                    th(style="text-align:center")=i.id 
+                    if i.active
+                        th.green_dot
+                    else
+                        th.red_dot
+                    th(style="text-align:center")=i.last_checkin 
+                    th(style="text-align:right") 
                         form(action='/manage/id', method="get")
                             button(type='submit', name="id", value=i.id)="manage"
-    div.control
-        tr
-            th
-                form(action='/logout', method="get")
-                    input(type='submit', value='logout')
-            th   
-                form(action='/manage/create', method="get")
-                    input(type='submit', value='create')

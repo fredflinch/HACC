@@ -1,8 +1,15 @@
 extends layout
 block layout-content
     div.header
-        h1='Management Page - '+id
+        h1='Management Page - ' + id
+        h2="Current Command Loaded: " + cur_cmd
     div.manage
+        p=""
+        form(action="/manage/id/update_cmd" method="post")
+            input(type="hidden" name="id" value=id)
+            input(type="text" name="new_cmd" placeholder="Enter Updated Command" id="new_cmd")
+            input(input type="submit" value="Update")
         form(action='/manage/delete', method="post")
-            button(type='submit', name="id", value=id)="delete"
+            button(type='submit', name="id", value=id)="delete agent"
+
         

@@ -55,7 +55,24 @@ module.exports = {
             }
           }, () => {})
         return rows 
-    }
+    },
+    update_cmd: async function (id, cmd){
+        try {
+            const sess = await do_cmd_update(cmd, id);
+            return sess
+        } catch {
+            console.log('updated')
+        }
+    },
+    server_get_cmd: async function (id, req, res){
+        try {
+            const cmd = await server_collect_cmd(id);
+            return cmd
+          } catch {
+            res.send('fail')
+            return -1
+        }
+    },
 };
 
 function gen_pwd(){
@@ -104,11 +121,34 @@ function collect_cmd (id, pwd){
     )
 }
 
+function server_collect_cmd (id){
+    let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'), sqlite3.OPEN_READONLY);
+    return new Promise((resolve, reject) =>
+      db.each("SELECT command FROM sessions WHERE id = \'"+id+"\'", [], (err, row) => {
+          resolve(row.command)
+          return
+      }, () => reject())
+    )
+}
+
 function delete_session (id){
     let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
     return new Promise((resolve, reject) =>
       db.each("DELETE FROM sessions WHERE id = \'"+id+"\'", [], (err, row) => {
         if (err) {console.log(err);}
+        resolve('')
+      }, () => reject())
+    )
+}
+
+// vulnrable to SQL Injection -- not sure if this is a feature of a
+function do_cmd_update(cmd, id){
+    let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
+    return new Promise((resolve, reject) =>
+      db.each("UPDATE sessions SET command=\'"+cmd+ "\' WHERE id = \'"+id+"\'", [], (err, row) => {
+        if (err) {
+            console.log(err);
+        }
         resolve('')
       }, () => reject())
     )

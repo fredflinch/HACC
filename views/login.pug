@@ -1,11 +1,21 @@
-extends layout
 
-block layout-content
-  div.View.LoginView
-    div.login
-      h1="Login"
-      form(action="/auth" method="post")
-        input(type="text" name="username" placeholder="Username" id="username" required)
-        input(type="password" name="password" placeholder="Password" id="password" required)
-        input(input type="submit" value="Login")
+block variables
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    link(rel="shortcut icon", href="/favicon.ico")
+    meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    meta(name="theme-color", content="#000000")
+    title #{title} | HACC
+    link(rel="stylesheet" href="/style.css")
+  body
+    div#root
+      div.View.LoginView
+        div.login
+          h1="Login"
+          form(action="/auth" method="post")
+            input(type="text" name="username" placeholder="Username" id="username" required)
+            input(type="password" name="password" placeholder="Password" id="password" required)
+            input(input type="submit" value="Login")
       
