@@ -1,0 +1,23 @@
+extends layout
+block layout-content
+    div.sessions
+            table.status_table.table
+                thead.thead-dark
+                    tr
+                        th(style="text-align:center") File Name 
+                        th(style="text-align:center") Created By 
+                        th(style="text-align:center") URL
+                        th 
+                each i in items
+                    tr
+                        th(style="text-align:center")=i.filename 
+                        th(style="text-align:center")=i.uname
+                        th(style="text-align:center")=i.url_value 
+                        th(style="text-align:right")
+                            div.file_buttons
+                                form(action='/manage/files/download', method="get")
+                                    button(type='submit', name="filename", value=i.filename)="download"
+                                form(action='/manage/files/delete', method="get")
+                                    button(type='submit', name="filename", value=i.filename)="delete"
+                                form(action='/manage/files/view', method="get")
+                                    button(type='submit', name="filename", value=i.filename)="view"

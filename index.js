@@ -8,8 +8,11 @@ var crypto = require('crypto');
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
+const fileUpload = require('express-fileupload');
+
 const http_c2 = require('./src/http_c2.js')
 const auth = require('./src/auth.js')
+const file_upload = require('./src/file_upload.js')
 
 
 /**
@@ -35,10 +38,15 @@ app.use(sessions({
     secret: "111",
     saveUninitialized: true,
     cookie: { 
-      maxAge: (1000 * 60) 
+      maxAge: (1000 * 60 * 60) 
     },
     resave: false 
 }));
+app.use(fileUpload({
+  createParentPath: true
+}));
+
+
 /**
  * Routes Definitions
  */
@@ -47,8 +55,10 @@ let main_page = '/list'
 
 var session;
 var ids = [];
-ids = http_c2.get_list(ids)
-http_c2.init_session(app)
+var files = [];
+ids = http_c2.get_list(ids);
+files = file_upload.get_files(files);
+http_c2.init_session(app);
 
 app.get("/", (req, res) => {
   if (req.session.userid){
@@ -99,8 +109,6 @@ app.post('/manage/delete', (req, res) => {
       break
     }
   }
-
-
   res.redirect(main_page);
 })
 
@@ -119,13 +127,91 @@ app.get(main_page, (req, res) => {
         ids[i].active = false;
       }
     }
-    if (remove >= 0){ids.splice(remove, 1)}
-
+    if (remove >= 0){
+      ids.splice(remove, 1)
+    }
     res.render('home', {title:'home', page_title:'List', items: ids})
   } else {
     res.redirect('/login');
   }
 })
+
+app.get('/manage/files', (req, res) => {
+  if (req.session.userid){
+    files = file_upload.get_files(files);
+    let remove = -1
+    for (let i = 0; i < files.length; i++){
+      if (ids[i].id == undefined){
+        remove = i;
+      }
+    }
+    if (remove >= 0){
+      files.splice(remove, 1)
+    }
+    res.render('files', {title:'files', items: files});
+  } else {
+    res.redirect('/login');
+  }
+})
+
+app.get('/manage/files/download', (req, res) => {
+  let fname2download = req.query.filename;
+  res.download('./uploads/'+fname2download);
+})
+// Path traversal bug in this function
+app.get('/manage/files/view', (req, res) => {
+  let fname2download = req.query.filename;
+  res.sendFile(path.join(__dirname,'/uploads/'+fname2download));
+})
+
+app.get('/manage/files/delete', (req, res) => {
+  let fname2del = req.query.filename;
+  let remove = -1
+  for (let i = 0; i < files.length; i++){
+    if (files[i].filename == fname2del){
+      remove = i;
+    }
+  }
+  if (remove >= 0){
+    files.splice(remove, 1)
+  }
+  file_upload.delete_file(fname2del);
+  res.redirect('/manage/files');
+})
+
+app.get('/upload', (req, res) => {
+  if (req.session.userid){
+    res.render('upload', {title:'upload'})
+  } else {
+    res.redirect('/login')
+  }
+});
+
+app.post('/do_upload', async (req, res) => {
+  try {
+    if(!req.files) {
+        res.send({
+            status: false,
+            message: 'No file uploaded'
+        });
+    } else {
+      let fname = req.files.file_name.name;
+      let upload_path = './uploads/'+fname
+      let url_v = file_upload.get_url(fname);
+      file_upload.update_upload(fname, req.session.userid, url_v, res)
+      req.files.file_name.mv(upload_path);
+      console.log(url_v)
+      app.get(url_v, (req, res) =>{
+        res.download(upload_path);
+      });
+      res.redirect('/manage/files')
+    }
+  } catch (err) {
+	  console.log(err)
+    res.status(500).send(err);
+  }
+});
+
 
 
 app.get('/logout',(req,res) => {

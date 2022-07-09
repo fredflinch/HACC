@@ -1,0 +1,14 @@
+extends layout
+block layout-content
+    div.upload_form
+        form(action='do_upload' method='post' enctype='multipart/form-data')
+            input(type='file' name='file_name' id='file_name')
+            img(src='/upload_img.png')
+            p drag or click to select payload/files to upload   
+            button(type='submit') Upload
+        script.
+            $(document).ready(function(){
+                $('form input').change(function () {
+                    $('form p').text(this.files.length + " file(s) selected");
+                });
+            }); 

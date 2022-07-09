@@ -35,12 +35,12 @@ module.exports = {
     init_session: async function (app){
         try {
             const sess = await collect_sessions(app);
+            const files = await collect_files(app);
             return sess
         } catch {
             console.log('init')
         }
     },
-    //TODO: make get list work to populate table
     get_list: function (rows) {
         let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
         db.each("SELECT id, active, last_checkin FROM sessions", [], (err, row) => {
@@ -76,7 +76,7 @@ module.exports = {
 };
 
 function gen_pwd(){
-    return [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    return [...Array(6)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
 function add_route (app, id) {
@@ -163,6 +163,17 @@ function collect_sessions (app) {
         ids.push(row.id)
         resolve('done!');
       }, () => reject())), 'ids': ids }
+}
+
+function collect_files (app) {
+    let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
+    new Promise((resolve, reject) =>
+      db.each("SELECT filename,url_value FROM files;", [], (err, row) => {
+        app.get(row.url_value, (req, res) => {
+            res.download('./uploads/'+row.filename);
+        });
+        resolve('files collected!');
+      }, () => reject()))
 }
 
 

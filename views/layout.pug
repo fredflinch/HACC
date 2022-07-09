@@ -9,27 +9,32 @@ html
     title #{title} | HACC
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
     link(rel="stylesheet" href="/style.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js").
+      
   body
     div#root
-      div#hambSide.sidenav
-        a.closebtn(href='javascript:void(0)' onclick='closeNav()') &times;
-        a(href='/list') List 
-        a(href='/manage/create') Create
-        a(href='/settings') Settings
-        a(href='/chat') Chat
-        a(href='/about') About
-        a(href='/logout') Logout
-      span(style='font-size:30px;cursor:pointer' onclick='openNav()') &#x2630;
-        h1=page_title
-      script.
-          function openNav() {
-            document.getElementById("hambSide").style.width = "250px";
-            document.getElementById("root").style.marginLeft = "250px";
-            document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
-          }
-          function closeNav() {
-            document.getElementById("hambSide").style.width = "0";
-            document.getElementById("root").style.marginLeft= "0";
-            document.body.style.backgroundColor = "white";
-          }
+      div#topbar
+        div#hambSide.sidenav
+          a.closebtn(href='javascript:void(0)' onclick='closeNav()') &times;
+          a(href='/list') Sessions 
+          a(href='/manage/create') Create
+          a(href='/upload') Upload File
+          a(href='/manage/files') List Files
+          a(href='/settings') Settings
+          a(href='/chat') Chat
+          a(href='/about') About
+          a(href='/logout') Logout
+        span(class="hamburger_menu" style='position:relative;left:1%;font-size:30px;cursor:pointer;color:#D4D4D4' onclick='openNav()') &#x2630;
+        script.
+            function openNav() {
+              document.getElementById("hambSide").style.width = "250px";
+              document.getElementById("root").style.marginLeft = "250px";
+              document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+            }
+            function closeNav() {
+              document.getElementById("hambSide").style.width = "0";
+              document.getElementById("root").style.marginLeft= "0";
+              /*Need this to change to the actual background colour*/
+              document.body.style.backgroundColor = "white";
+            }
       block layout-content
