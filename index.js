@@ -212,7 +212,13 @@ app.post('/do_upload', async (req, res) => {
   }
 });
 
-
+app.get('/settings', (req, res) => {
+  if (req.session.userid){
+    res.render('settings', {user: req.session.userid})
+  } else {
+    res.redirect('/login')
+  }
+})
 
 app.get('/logout',(req,res) => {
   req.session.destroy();
