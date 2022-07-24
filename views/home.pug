@@ -7,6 +7,7 @@ block layout-content
                     th(style="text-align:center") Session 
                     th(style="text-align:center") Active 
                     th(style="text-align:center") Last Checkin
+                    th(style="text-align:center") Password
                     th 
             each i in items
                 tr
@@ -15,7 +16,8 @@ block layout-content
                         th.green_dot
                     else
                         th.red_dot
-                    th(style="text-align:center")=i.last_checkin 
+                    th(style="text-align:center")=i.last_checkin
+                    th(style="text-align:center")=i.pwd
                     th(style="text-align:right") 
                         form(action='/manage/id', method="get")
                             button(type='submit', name="id", value=i.id)="manage"

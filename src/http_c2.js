@@ -43,7 +43,7 @@ module.exports = {
     },
     get_list: function (rows) {
         let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
-        db.each("SELECT id, active, last_checkin FROM sessions", [], (err, row) => {
+        db.each("SELECT id, active, last_checkin, pwd FROM sessions", [], (err, row) => {
             var ids = rows.map(({id}) => id);
             if (!ids.includes(row.id) && row.id!=""){
                 rows.push(row)
