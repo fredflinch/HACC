@@ -3,6 +3,7 @@ block layout-content
     div.header
         h1='Management Page - ' + id
         h2="Current Command Loaded: " + cur_cmd
+        script(src="/js/jquery.js")
     div.manage
         p=""
         form(action="/manage/id/update_cmd" method="post")
@@ -11,5 +12,14 @@ block layout-content
             input(input type="submit" value="Update")
         form(action='/manage/delete', method="post")
             button(type='submit', name="id", value=id)="delete agent"
+                
+        div(class="dropdown show")    
+            a(class="btn btn-secondary dropdown-toggle", href="#", role="button", id="dropdownMenuLink", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false")="Payload Selection"
+            div(class="dropdown-menu", aria-labelledby="dropdownMenuLink")
+                a(class="dropdown-item", href="/manage/create/payload?payload=basic_ps&id="+id)="Basic PowerShell"
+                a(class="dropdown-item", href="#")="Java Payload (not implmented)"
+        
 
+
+    
         

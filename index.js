@@ -1,6 +1,10 @@
-/**
- * Required External Modules
- */
+//TODO:
+//  - Implement response component for payloads to talk back and have the data recorded
+//    - handle response and view for users
+//  - Clean up the manage page to look good
+//  - Create robust payload language definition for commands
+
+
 const express = require("express");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
@@ -10,9 +14,10 @@ const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 const fileUpload = require('express-fileupload');
 
-const http_c2 = require('./src/http_c2.js')
-const auth = require('./src/auth.js')
-const file_upload = require('./src/file_upload.js')
+const http_c2 = require('./src/http_c2.js');
+const auth = require('./src/auth.js');
+const file_upload = require('./src/file_upload.js');
+const create_payload = require('./src/create_payload.js');
 
 
 /**
@@ -56,6 +61,7 @@ let main_page = '/list'
 var session;
 var ids = [];
 var files = [];
+
 ids = http_c2.get_list(ids);
 files = file_upload.get_files(files);
 http_c2.init_session(app);
@@ -112,6 +118,25 @@ app.post('/manage/delete', (req, res) => {
   res.redirect(main_page);
 })
 
+
+// fix localhost for prod
+app.get('/manage/create/payload', (req, res) => {
+  let pType = req.query.payload 
+  let id = req.query.id;
+  let id_obj = ""
+  for(let i of ids){
+    if (i.id === id){
+      id_obj = i;
+      break 
+    }
+  }
+
+  if (pType = 'basic_ps'){
+    app = create_payload.create_basic_ps_payload(id_obj, port, 'localhost', app);
+  }
+  // stay on the same page
+  res.status(204).send();
+});
 
 app.get(main_page, (req, res) => {
   if (req.session.userid){
@@ -229,3 +254,4 @@ app.get('/logout',(req,res) => {
  * Server Activation -- run with 'npm run dev'
  */
 app.listen(port, () => { console.log(`Listening to requests on http://localhost:${port}`); });
+
