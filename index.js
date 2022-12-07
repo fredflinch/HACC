@@ -1,6 +1,6 @@
 //TODO:
 //  - Implement response component for payloads to talk back and have the data recorded
-//    - handle response and view for users
+//  - handle response and view for users
 //  - Clean up the manage page to look good
 //  - Create robust payload language definition for commands
 
@@ -18,7 +18,7 @@ const http_c2 = require('./src/http_c2.js');
 const auth = require('./src/auth.js');
 const file_upload = require('./src/file_upload.js');
 const create_payload = require('./src/create_payload.js');
-
+const settings = require('./src/settings.js');
 
 /**
  * App Variables
@@ -65,6 +65,8 @@ var files = [];
 ids = http_c2.get_list(ids);
 files = file_upload.get_files(files);
 http_c2.init_session(app);
+var global_settings = settings.read_settings('./settings.conf')
+
 
 app.get("/", (req, res) => {
   if (req.session.userid){
@@ -132,7 +134,7 @@ app.get('/manage/create/payload', (req, res) => {
   }
 
   if (pType = 'basic_ps'){
-    app = create_payload.create_basic_ps_payload(id_obj, port, 'localhost', app);
+    app = create_payload.create_basic_ps_payload(id_obj, port, 'localhost', "5", app);
   }
   // stay on the same page
   res.status(204).send();
@@ -146,7 +148,18 @@ app.get(main_page, (req, res) => {
       if (ids[i].id == undefined){
         remove = i;
       }
-      if (ids[i].active == 1){
+      
+      let lastCheckin = new Date(ids[i].last_checkin)
+      let currentTime = new Date();
+      let expired = false
+      if (ids[i].last_checkin == "00/00/00 00:00:00"){
+        expired = true
+        http_c2.deactivate_session(ids[i].id)
+      } else if ((currentTime - lastCheckin)/1000 > global_settings.max_timeout) {
+        expired = true
+        http_c2.deactivate_session(ids[i].id)
+      }
+      if (ids[i].active == 1 && !expired){
         ids[i].active = true;
       } else {
         ids[i].active = false;

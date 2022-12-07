@@ -17,9 +17,17 @@ module.exports = {
     get_cmd: async function (id, req, res){
         try {
             let pwd = req.get('Authorization')
+            let data = req.header('WWW-Authenticate');
+            if (data != null){
+                // add save to DB here 
+                console.log(req.get('WWW-Authenticate'))
+                module.exports.activate_session(id);
+                res.send("ok")
+                return
+            }
             const cmd = await collect_cmd(id, pwd);
             res.send(cmd)
-            return cmd
+            return cmd            
           } catch {
             res.send('fail')
             return -1
@@ -64,6 +72,18 @@ module.exports = {
             console.log('updated')
         }
     },
+    deactivate_session: async function (id){
+        try {
+            const sess = await de_active(id);
+            return sess
+        } catch { }
+    },
+    activate_session: async function (id){
+        try {
+            const sess = await re_active(id);
+            return sess
+        } catch { }
+    },
     server_get_cmd: async function (id, req, res){
         try {
             const cmd = await server_collect_cmd(id);
@@ -82,6 +102,7 @@ function gen_pwd(){
 function add_route (app, id) {
     app.get("/id/"+id, (req, res) => {
         module.exports.get_cmd(id, req, res)
+        //add checkin 
     })
     app.get("/manage/id/"+id, (req, res) => {
         res.render("manage", { title: "manage id:" + id });
@@ -153,6 +174,34 @@ function do_cmd_update(cmd, id){
       }, () => reject())
     )
 }
+
+// vulnrable to SQL Injection
+function de_active(id){
+    let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
+    return new Promise((resolve, reject) =>
+      db.each("UPDATE sessions SET active=FALSE WHERE id = \'"+id+"\'", [], (err, row) => {
+        if (err) {
+            console.log(err);
+        }
+        resolve('')
+      }, () => reject())
+    )
+}
+
+// vulnrable to SQL Injection
+function re_active(id){
+    let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
+    let currentTime = new Date();
+    return new Promise((resolve, reject) =>
+      db.each("UPDATE sessions SET active=TRUE, last_checkin=\'"+currentTime+"\' WHERE id = \'"+id+"\'", [], (err, row) => {
+        if (err) {
+            console.log(err);
+        }
+        resolve('')
+      }, () => reject())
+    )
+}
+
 
 function collect_sessions (app) {
     let db = new sqlite3.Database(path.join(__dirname, '../db/store.db'));
